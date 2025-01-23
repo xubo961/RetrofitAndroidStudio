@@ -1,14 +1,16 @@
 package com.xubop961.retrofitexample;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -16,36 +18,57 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    private RecyclerView recyclerView;
+    private CoctailAdapter adapter;
+    private ApiInterface apiInterface;
+    private EditText searchInput;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
-        TextView principal = findViewById(R.id.principal);
-        ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<Drinks> call = apiInterface.getDrinksByLicour("Gin");
+        recyclerView = findViewById(R.id.coctailTodo);
+        searchInput = findViewById(R.id.cocktailSearchInput);
+        Button searchButton = findViewById(R.id.coctailBotonBuscar);
+
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // Grid con 2 columnas
+        adapter = new CoctailAdapter(this, coctail -> {
+            // Abre una nueva actividad con detalles del cóctel
+            Intent intent = new Intent(this, CoctailDetailsActivity.class);
+            intent.putExtra("COCTAIL_ID", coctail.coctailId);
+            startActivity(intent);
+        });
+        recyclerView.setAdapter(adapter);
+
+        apiInterface = ApiClient.getClient().create(ApiInterface.class);
+
+        searchButton.setOnClickListener(v -> {
+            String ingredient = searchInput.getText().toString().trim();
+            if (!ingredient.isEmpty()) {
+                fetchCocktails(ingredient);
+            } else {
+                Toast.makeText(this, "Introduce un ingrediente", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchCocktails(String ingredient) {
+        Call<Drinks> call = apiInterface.getDrinksByLicour(ingredient);
         call.enqueue(new Callback<Drinks>() {
             @Override
             public void onResponse(Call<Drinks> call, Response<Drinks> response) {
-                Log.d("Código", response.code()+"");
-                Drinks coctails = response.body();
-                String todaLaInformacion = "";
-                for (Drinks.Coctail coctail : coctails.drinks) {
-                    todaLaInformacion = todaLaInformacion + coctail.coctailName + "\n";
+                if (response.body() != null && response.body().drinks != null) {
+                    adapter.setCoctails(response.body().drinks);
+                } else {
+                    Toast.makeText(MainActivity.this, "No se encontraron resultados", Toast.LENGTH_SHORT).show();
                 }
-                Log.d("TodaLaInfo", todaLaInformacion);
-                principal.setText(todaLaInformacion);
             }
 
             @Override
-            public void onFailure(Call<Drinks> call, Throwable throwable) {
-                Log.d("CALL -> mal", throwable.toString());
+            public void onFailure(Call<Drinks> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("API_ERROR", t.getMessage(), t);
             }
         });
     }
