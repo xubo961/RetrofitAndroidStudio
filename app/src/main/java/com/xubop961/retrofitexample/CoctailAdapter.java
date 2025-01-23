@@ -11,18 +11,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
 
 public class CoctailAdapter extends RecyclerView.Adapter<CoctailAdapter.ViewHolder> {
 
     private final Context context;
-    private final OnCoctailClickListener listener;
     private List<Drinks.Coctail> coctails;
 
-    public CoctailAdapter(Context context, OnCoctailClickListener listener) {
+    public CoctailAdapter(Context context) {
         this.context = context;
-        this.listener = listener;
     }
 
     public void setCoctails(List<Drinks.Coctail> coctails) {
@@ -42,16 +41,31 @@ public class CoctailAdapter extends RecyclerView.Adapter<CoctailAdapter.ViewHold
         Drinks.Coctail coctail = coctails.get(position);
         holder.name.setText(coctail.coctailName);
         Glide.with(context).load(coctail.coctailImageUrl).into(holder.image);
-        holder.itemView.setOnClickListener(v -> listener.onCoctailClick(coctail));
+
+        holder.itemView.setOnClickListener(v -> {
+            // Inflate the custom alert dialog layout
+            View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_coctail_details, null);
+
+            // Set dialog content
+            ImageView dialogImage = dialogView.findViewById(R.id.dialogCoctailImage);
+            TextView dialogName = dialogView.findViewById(R.id.dialogCoctailName);
+            TextView dialogId = dialogView.findViewById(R.id.dialogCoctailId);
+
+            Glide.with(context).load(coctail.coctailImageUrl).into(dialogImage);
+            dialogName.setText(coctail.coctailName);
+            dialogId.setText("ID: " + coctail.coctailId);
+
+            // Show the dialog
+            new MaterialAlertDialogBuilder(context)
+                    .setView(dialogView)
+                    .setNegativeButton("Cerrar", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
     }
 
     @Override
     public int getItemCount() {
         return coctails == null ? 0 : coctails.size();
-    }
-
-    public interface OnCoctailClickListener {
-        void onCoctailClick(Drinks.Coctail coctail);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

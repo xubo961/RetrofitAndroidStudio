@@ -1,6 +1,5 @@
 package com.xubop961.retrofitexample;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,12 +32,7 @@ public class MainActivity extends AppCompatActivity {
         Button searchButton = findViewById(R.id.coctailBotonBuscar);
 
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // Grid con 2 columnas
-        adapter = new CoctailAdapter(this, coctail -> {
-            // Abre una nueva actividad con detalles del cóctel
-            Intent intent = new Intent(this, CoctailDetailsActivity.class);
-            intent.putExtra("COCTAIL_ID", coctail.coctailId);
-            startActivity(intent);
-        });
+        adapter = new CoctailAdapter(this);
         recyclerView.setAdapter(adapter);
 
         apiInterface = ApiClient.getClient().create(ApiInterface.class);
