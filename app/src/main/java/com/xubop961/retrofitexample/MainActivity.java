@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         searchInput = findViewById(R.id.cocktailSearchInput);
         Button searchButton = findViewById(R.id.coctailBotonBuscar);
 
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // Grid con 2 columnas
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new CoctailAdapter(this);
         recyclerView.setAdapter(adapter);
 

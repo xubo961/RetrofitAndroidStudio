@@ -43,10 +43,8 @@ public class CoctailAdapter extends RecyclerView.Adapter<CoctailAdapter.ViewHold
         Glide.with(context).load(coctail.coctailImageUrl).into(holder.image);
 
         holder.itemView.setOnClickListener(v -> {
-            // Inflate the custom alert dialog layout
             View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_coctail_details, null);
 
-            // Set dialog content
             ImageView dialogImage = dialogView.findViewById(R.id.dialogCoctailImage);
             TextView dialogName = dialogView.findViewById(R.id.dialogCoctailName);
             TextView dialogId = dialogView.findViewById(R.id.dialogCoctailId);
@@ -55,7 +53,6 @@ public class CoctailAdapter extends RecyclerView.Adapter<CoctailAdapter.ViewHold
             dialogName.setText(coctail.coctailName);
             dialogId.setText("ID: " + coctail.coctailId);
 
-            // Show the dialog
             new MaterialAlertDialogBuilder(context)
                     .setView(dialogView)
                     .setNegativeButton("Cerrar", (dialog, which) -> dialog.dismiss())
